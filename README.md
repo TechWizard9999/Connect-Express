@@ -4,7 +4,7 @@
 
 ---
 
-## 📖 What We Built (Simple English)
+## 📖 What We Built 
 
 **Problem:** You want to travel from Station A to Station B, but there's no direct train. How do you find a route where you can:
 1. Take Train 1 from A to some Station X
