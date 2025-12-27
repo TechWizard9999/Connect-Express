@@ -1,0 +1,23 @@
+{
+    "name": "connect-express-backend",
+    "version": "1.0.0",
+    "description": "Backend API for Connect Express railway routing application",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node server.js"
+    },
+    "keywords": [
+        "railway",
+        "trains",
+        "routing"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
+        "mongoose": "^8.0.3",
+        "mongodb-memory-server": "^10.0.0"
+    }
+}
