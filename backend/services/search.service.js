@@ -1,9 +1,9 @@
-// Search Service - finds train routes
+// search service
 const { Train } = require('../models');
 const { MIN_LAYOVER, MAX_LAYOVER } = require('../config');
 const { timeToMinutes, calculateDuration, formatDuration } = require('../utils');
 
-// find direct trains (A → B)
+// find direct
 async function findDirectTrains(fromCode, toCode) {
   const directTrains = await Train.find({ 'stops.stationCode': { $all: [fromCode, toCode] } });
   const results = [];
@@ -34,12 +34,12 @@ async function findDirectTrains(fromCode, toCode) {
   return results.sort((a, b) => (a.duration || 9999) - (b.duration || 9999));
 }
 
-// find connecting trains (A → X → B)
+// find connecting
 async function findConnectingTrains(fromCode, toCode) {
   const trainsFromA = await Train.find({ 'stops.stationCode': fromCode });
   const trainsToB = await Train.find({ 'stops.stationCode': toCode });
 
-  // build map of stations reachable from A
+  // build map
   const intermediateFromA = new Map();
   trainsFromA.forEach(train => {
     const stops = train.stops;
@@ -53,7 +53,7 @@ async function findConnectingTrains(fromCode, toCode) {
     }
   });
 
-  // build map of stations that can reach B
+  // build map
   const intermediateToB = new Map();
   trainsToB.forEach(train => {
     const stops = train.stops;
@@ -67,7 +67,7 @@ async function findConnectingTrains(fromCode, toCode) {
     }
   });
 
-  // find common connection points
+  // find common
   const commonStations = [...intermediateFromA.keys()].filter(code => intermediateToB.has(code));
   const results = [];
 

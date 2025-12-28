@@ -1,8 +1,8 @@
-// Server - main entry point
+// server
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { PORT } = require('./config');
 const apiRoutes = require('./routes');
@@ -25,31 +25,25 @@ app.get('/', (req, res) => {
   });
 });
 
-// start server with in-memory database
+// start server
 async function startServer() {
   try {
-    console.log('🚂 Starting Connect Express...\n');
-
-    console.log('📦 Setting up in-memory database...');
-    const mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI not found in environment variables');
+    }
 
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to in-memory MongoDB\n');
+    console.log('Connected to MongoDB Atlas');
 
     const { stationCount, trainCount } = await seedDatabase();
 
     app.listen(PORT, () => {
-      console.log('\n========================================');
-      console.log('🎉 Connect Express is ready!');
-      console.log('========================================');
-      console.log(`   API Server: http://localhost:${PORT}`);
-      console.log(`   Stations: ${stationCount}`);
-      console.log(`   Trains: ${trainCount}`);
-      console.log('========================================\n');
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Stations: ${stationCount} | Trains: ${trainCount}`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }

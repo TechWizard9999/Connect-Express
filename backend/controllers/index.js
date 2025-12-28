@@ -1,8 +1,8 @@
-// Controllers - handle API requests
+// controllers
 const { Station } = require('../models');
 const { findDirectTrains, findConnectingTrains } = require('../services/search.service');
 
-// get all stations
+// fetch stations
 async function getStations(req, res) {
   try {
     const stations = await Station.find().sort({ name: 1 });
@@ -13,7 +13,7 @@ async function getStations(req, res) {
   }
 }
 
-// search for routes between two stations
+// search routes
 async function searchRoutes(req, res) {
   try {
     const { from, to } = req.query;

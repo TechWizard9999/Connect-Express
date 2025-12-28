@@ -1,4 +1,4 @@
-// Models - database schemas
+// models
 const mongoose = require('mongoose');
 
 // station schema
@@ -8,7 +8,7 @@ const stationSchema = new mongoose.Schema({
   state: { type: String, required: true, enum: ['TN', 'KA', 'AP'] }
 });
 
-// stop schema (embedded in train)
+// stop schema
 const stopSchema = new mongoose.Schema({
   stationCode: { type: String, required: true, uppercase: true },
   arrivalTime: { type: String, default: null },

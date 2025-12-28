@@ -1,9 +1,9 @@
-// Seeder Service - generates dummy train data
+// seeder service
 const { Station, Train } = require('../models');
 const { stations, routes } = require('../data');
 const { addMinutes, generateTrainName } = require('../utils');
 
-// generate trains from route definitions
+// generate trains
 function generateTrains() {
   const trains = [];
   let trainNumber = 12001;
@@ -46,20 +46,25 @@ function generateTrains() {
   return trains;
 }
 
-// seed database with stations and trains
+// seed database
 async function seedDatabase() {
-  console.log('🌱 Seeding database with train data...');
+  const existingStations = await Station.countDocuments();
+  const existingTrains = await Train.countDocuments();
+  
+  if (existingStations > 0 && existingTrains > 0) {
+    return { stationCount: existingStations, trainCount: existingTrains };
+  }
   
   await Station.deleteMany({});
   await Train.deleteMany({});
   
   const uniqueStations = [...new Map(stations.map(s => [s.code, s])).values()];
   await Station.insertMany(uniqueStations);
-  console.log(`   📍 Inserted ${uniqueStations.length} stations`);
   
   const trains = generateTrains();
   await Train.insertMany(trains);
-  console.log(`   🚆 Inserted ${trains.length} trains`);
+  
+  console.log('Database seeded successfully');
   
   return { stationCount: uniqueStations.length, trainCount: trains.length };
 }
