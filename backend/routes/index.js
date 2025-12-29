@@ -1,4 +1,3 @@
-// routes
 const express = require('express');
 const router = express.Router();
 const { getStations, searchRoutes } = require('../controllers');
