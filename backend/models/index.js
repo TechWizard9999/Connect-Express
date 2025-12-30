@@ -23,6 +23,9 @@ const trainSchema = new mongoose.Schema({
   stops: { type: [stopSchema], required: true }
 });
 
+// indexing for stops
+trainSchema.index({ "stops.stationCode": 1 });
+
 const Station = mongoose.model('Station', stationSchema);
 const Train = mongoose.model('Train', trainSchema);
 
