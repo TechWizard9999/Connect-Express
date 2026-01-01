@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
 import Home from './views/Home'
@@ -6,9 +7,40 @@ import Search from './views/Search'
 function App() {
   const location = useLocation()
   const isHomePage = location.pathname === '/'
+  
+  // Theme state - check localStorage for saved preference, default to dark
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    // Default to dark if no preference saved
+    if (!saved) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      return 'dark'
+    }
+    document.documentElement.setAttribute('data-theme', saved)
+    return saved
+  })
+
+  // Apply theme to document when changed
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark')
+  }
 
   return (
     <div className="app-root">
+      {/* Theme Toggle Button */}
+      <button 
+        className="theme-toggle" 
+        onClick={toggleTheme}
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+
       {/* Global Background (only on non-home pages if home has its own) */}
       {!isHomePage && (
         <div className="bg-container">
