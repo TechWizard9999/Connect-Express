@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import SearchForm from '../components/SearchForm'
 import ResultCard from '../components/ResultCard'
 
-const API_URL = 'http://localhost:5002/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api'
 
 function Search() {
   const [stations, setStations] = useState([])
