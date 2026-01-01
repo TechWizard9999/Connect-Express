@@ -34,8 +34,15 @@ async function findDirectTrains(fromCode, toCode) {
   return results.sort((a, b) => (a.duration || 9999) - (b.duration || 9999));
 }
 
-// find connecting
-const routeEngine = require('../build/Release/route_engine.node');
+// find connecting - try C++ first, fallback to JS
+let routeEngine;
+try {
+  routeEngine = require('../build/Release/route_engine.node');
+  console.log('Using C++ route engine');
+} catch (err) {
+  routeEngine = require('./route-engine-fallback');
+  console.log('Using JavaScript route engine fallback');
+}
 
 async function findConnectingTrains(fromCode, toCode) {
   const trainsFromA = await Train.find({ 'stops.stationCode': fromCode }).lean();

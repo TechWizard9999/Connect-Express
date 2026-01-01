@@ -6,8 +6,8 @@
     "scripts": {
         "start": "node server.js",
         "dev": "node server.js",
-        "install": "cmake-js compile",
-        "rebuild": "cmake-js rebuild"
+        "build-native": "cmake-js compile",
+        "rebuild-native": "cmake-js rebuild"
     },
     "keywords": [
         "railway",

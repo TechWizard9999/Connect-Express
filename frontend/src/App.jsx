@@ -3,7 +3,7 @@ import './App.css'
 import SearchForm from './components/SearchForm'
 import ResultCard from './components/ResultCard'
 
-const API_URL = 'http://localhost:5001/api'
+const API_URL = 'http://localhost:5002/api'
 
 function App() {
   const [stations, setStations] = useState([])
