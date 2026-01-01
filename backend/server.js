@@ -28,9 +28,9 @@ app.get('/', (req, res) => {
 // start server
 async function startServer() {
   try {
-    const mongoUri = process.env.MONGODB_URI;
+    const mongoUri = process.env.MONGO_URI;
     if (!mongoUri) {
-      throw new Error('MONGODB_URI not found in environment variables');
+      throw new Error('MONGO_URI not found in environment variables');
     }
 
     await mongoose.connect(mongoUri);
