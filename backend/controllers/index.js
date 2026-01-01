@@ -13,6 +13,8 @@ async function getStations(req, res) {
   }
 }
 
+const redisClient = require('../config/redis');
+
 // search routes
 async function searchRoutes(req, res) {
   try {
@@ -29,17 +31,47 @@ async function searchRoutes(req, res) {
       return res.status(400).json({ success: false, error: 'Source and destination cannot be same' });
     }
 
+    // Check cache
+    const cacheKey = `search:${fromCode}:${toCode}`;
+    let cachedData = null;
+    
+    if (redisClient.isReady) {
+      try {
+        cachedData = await redisClient.get(cacheKey);
+      } catch (err) {
+        console.error('Redis get error:', err);
+      }
+    }
+
+    if (cachedData) {
+
+      return res.json(JSON.parse(cachedData));
+    }
+
     const direct = await findDirectTrains(fromCode, toCode);
     const connecting = await findConnectingTrains(fromCode, toCode);
 
-    res.json({
+    const result = {
       success: true,
       from: fromCode,
       to: toCode,
       directCount: direct.length,
       connectingCount: connecting.length,
       results: { direct, connecting }
-    });
+    };
+
+    // Cache Data
+    if (redisClient.isReady) {
+      try {
+        await redisClient.set(cacheKey, JSON.stringify(result), {
+          EX: 3600
+        });
+      } catch (err) {
+        console.error('Redis set error:', err);
+      }
+    }
+
+    res.json(result);
   } catch (error) {
     console.error('Error in search:', error);
     res.status(500).json({ success: false, error: 'Server error during search' });
