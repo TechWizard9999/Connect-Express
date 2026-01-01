@@ -52,7 +52,23 @@ Because the computer checks **thousands of combinations** instantly. If there ar
 
 ---
 
-## 3. Practical Example: Multi-User Scenario
+## 3. Caching Strategy (Redis)
+
+We implement a **Cache-Aside** strategy to improve performance for frequent searches.
+
+- **Cache Key**: `search:{FROM_STATION}:{TO_STATION}` (e.g., `search:MAS:SBC`)
+- **Cache Value**: The complete JSON response containing both direct and connecting routes.
+- **TTL (Time-To-Live)**: 1 hour (3600 seconds).
+- **Behavior**: 
+  1. Check Redis cache first.
+  2. If found, return cached JSON immediately.
+  3. If missing (or Redis down), compute routes using MongoDB/C++.
+  4. Store result in Redis for future requests.
+- **Degradation**: If Redis is unreachable, the system gracefully falls back to the database without crashing.
+
+---
+
+## 4. Practical Example: Multi-User Scenario
 
 ### Scenario: 3 Users Searching Simultaneously
 **Current State**: Server running on port 5002, connected to MongoDB Atlas (212 trains).

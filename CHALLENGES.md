@@ -37,3 +37,8 @@ We have designed the system so we can **combine** both approaches in the future.
 *   **File**: `backend/src/router.cpp`
 *   **Change**: Implemented `std::unordered_map` for O(1) lookups.
 *   **Status**: Live and Verified.
+
+## [2026-01-01] Redis Integration for Optional Caching
+- **Context**: Adding Redis caching to the search endpoint to improve performance.
+- **Challenge**: ensuring the application remains fully functional even if the Redis server is not running (e.g., in a local development environment without Redis installed).
+- **Resolution**: Wrapped Redis client calls with `isReady` checks and added error handling for individual operations. Configured the client to stop reconnecting after a timeout to prevent request hanging.
