@@ -3,7 +3,7 @@ import './App.css'
 import SearchForm from './components/SearchForm'
 import ResultCard from './components/ResultCard'
 
-const API_URL = 'http://localhost:5001/api'
+const API_URL = 'http://localhost:5002/api'
 
 function App() {
   const [stations, setStations] = useState([])
@@ -57,80 +57,96 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="logo">
-          <span className="logo-icon">🚂</span>
-          <h1>Connect Express</h1>
+    <div className="app-root">
+      <div className="bg-container">
+        <div className="bg-aurora"></div>
+        <div className="bg-grid"></div>
+        <div className="bg-tracks">
+          <div className="track-line"></div>
         </div>
-        <p className="tagline">Find connecting trains when direct routes aren't available</p>
-      </header>
+      </div>
 
-      <section className="search-section">
-        <SearchForm 
-          stations={stations} 
-          onSearch={handleSearch} 
-          loading={loading}
-        />
-        {error && <div className="error-message">{error}</div>}
-      </section>
-
-      {loading && (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Searching for routes...</p>
-        </div>
-      )}
-
-      {results && !loading && (
-        <section className="results-section">
-          <div className="results-header">
-            <h2 className="results-title">
-              {getStationName(searchParams.from)} → {getStationName(searchParams.to)}
-            </h2>
-            <div className="results-summary">
-              <span className="summary-badge direct">
-                {results.directCount} Direct
-              </span>
-              <span className="summary-badge connecting">
-                {results.connectingCount} Connecting
-              </span>
-            </div>
+      <div className="app">
+        <header className="header">
+          <div className="logo">
+            <span className="logo-icon">🚄</span>
+            <h1>Connect Express</h1>
           </div>
+          <p className="tagline">The future of seamless railway routing. Find your connection, ignore the gaps.</p>
+        </header>
 
-          {results.directCount === 0 && results.connectingCount === 0 ? (
-            <div className="no-results">
-              <div className="no-results-icon">🔍</div>
-              <h3>No routes found</h3>
-              <p>Try searching between different stations</p>
-            </div>
-          ) : (
-            <div className="result-cards">
-              {results.results.direct.map((route, index) => (
-                <ResultCard 
-                  key={`direct-${index}`} 
-                  route={route}
-                  getStationName={getStationName}
-                />
-              ))}
-
-              {results.results.direct.length > 0 && results.results.connecting.length > 0 && (
-                <div className="section-divider">
-                  <span>Connecting Routes</span>
-                </div>
-              )}
-
-              {results.results.connecting.map((route, index) => (
-                <ResultCard 
-                  key={`connecting-${index}`} 
-                  route={route}
-                  getStationName={getStationName}
-                />
-              ))}
-            </div>
-          )}
+        <section className="search-section">
+          <SearchForm 
+            stations={stations} 
+            onSearch={handleSearch} 
+            loading={loading}
+          />
+          {error && <div className="error-message">{error}</div>}
         </section>
-      )}
+
+        {loading && (
+          <div className="loading-container">
+            <div className="train-track-loader">
+              <div className="train-loader"></div>
+            </div>
+            <p className="loading-text">Optimizing routes...</p>
+          </div>
+        )}
+
+        {results && !loading && (
+          <section className="results-section">
+            <div className="results-header">
+              <h2 className="results-title">
+                {getStationName(searchParams.from)} <span className="arrow">→</span> {getStationName(searchParams.to)}
+              </h2>
+              <div className="results-summary">
+                <span className="summary-badge direct">
+                  {results.directCount} Direct
+                </span>
+                <span className="summary-badge connecting">
+                  {results.connectingCount} Connecting
+                </span>
+              </div>
+            </div>
+
+            {results.directCount === 0 && results.connectingCount === 0 ? (
+              <div className="no-results">
+                <div className="no-results-icon">🔍</div>
+                <h3>No routes found</h3>
+                <p>Try searching between different stations</p>
+              </div>
+            ) : (
+              <div className="result-cards">
+                {results.results.direct.map((route, index) => (
+                  <ResultCard 
+                    key={`direct-${index}`} 
+                    route={route}
+                    getStationName={getStationName}
+                  />
+                ))}
+
+                {results.results.direct.length > 0 && results.results.connecting.length > 0 && (
+                  <div className="section-divider">
+                    <span>Connecting Routes</span>
+                  </div>
+                )}
+
+                {results.results.connecting.map((route, index) => (
+                  <ResultCard 
+                    key={`connecting-${index}`} 
+                    route={route}
+                    getStationName={getStationName}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+      
+      <footer className="footer">
+        <p>&copy; 2026 Connect Express. Engineered for speed.</p>
+      </footer>
     </div>
   )
 }
