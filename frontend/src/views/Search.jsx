@@ -3,6 +3,8 @@ import SearchForm from '../components/SearchForm'
 import ResultCard from '../components/ResultCard'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api'
+const RECENT_SEARCHES_KEY = 'connectExpress_recentSearches'
+const MAX_RECENT_SEARCHES = 5
 
 function Search() {
   const [stations, setStations] = useState([])
@@ -11,10 +13,39 @@ function Search() {
   const [error, setError] = useState(null)
   const [searchParams, setSearchParams] = useState({ from: '', to: '' })
   const [sortBy, setSortBy] = useState('duration')
+  const [recentSearches, setRecentSearches] = useState([])
 
   useEffect(() => {
     fetchStations()
+    loadRecentSearches()
   }, [])
+
+  const loadRecentSearches = () => {
+    try {
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY)
+      if (saved) {
+        setRecentSearches(JSON.parse(saved))
+      }
+    } catch (err) {
+      console.error('Error loading recent searches:', err)
+    }
+  }
+
+  const saveRecentSearch = (from, to) => {
+    const newSearch = { from, to, timestamp: Date.now() }
+    const updated = [
+      newSearch,
+      ...recentSearches.filter(s => !(s.from === from && s.to === to))
+    ].slice(0, MAX_RECENT_SEARCHES)
+    
+    setRecentSearches(updated)
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+  }
+
+  const clearRecentSearches = () => {
+    setRecentSearches([])
+    localStorage.removeItem(RECENT_SEARCHES_KEY)
+  }
 
   const fetchStations = async () => {
     try {
@@ -33,6 +64,7 @@ function Search() {
     setError(null)
     setResults(null)
     setSearchParams({ from, to })
+    saveRecentSearch(from, to)
 
     try {
       const response = await fetch(`${API_URL}/search?from=${from}&to=${to}`)
@@ -97,6 +129,36 @@ function Search() {
           onSearch={handleSearch} 
           loading={loading}
         />
+        
+        {/* Recent Searches */}
+        {recentSearches.length > 0 && !results && !loading && (
+          <div className="recent-searches">
+            <div className="recent-header">
+              <span className="recent-title">🕐 Recent Searches</span>
+              <button 
+                className="clear-recent-btn" 
+                onClick={clearRecentSearches}
+                title="Clear history"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="recent-list">
+              {recentSearches.map((search, index) => (
+                <button
+                  key={index}
+                  className="recent-item"
+                  onClick={() => handleSearch(search.from, search.to)}
+                >
+                  <span className="recent-route">
+                    {getStationName(search.from)} → {getStationName(search.to)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {error && <div className="error-message">{error}</div>}
       </section>
 
