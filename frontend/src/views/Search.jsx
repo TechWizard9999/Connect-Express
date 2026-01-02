@@ -4,6 +4,8 @@ import ResultCard from '../components/ResultCard'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api'
 const RECENT_SEARCHES_KEY = 'connectExpress_recentSearches'
+const STATIONS_CACHE_KEY = 'connectExpress_stations'
+const STATIONS_CACHE_EXPIRY = 24 * 60 * 60 * 1000 // 24 hours
 const MAX_RECENT_SEARCHES = 5
 
 function Search() {
@@ -48,11 +50,34 @@ function Search() {
   }
 
   const fetchStations = async () => {
+    // Try to load from cache first
+    try {
+      const cached = localStorage.getItem(STATIONS_CACHE_KEY)
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached)
+        const isExpired = Date.now() - timestamp > STATIONS_CACHE_EXPIRY
+        if (!isExpired && data && data.length > 0) {
+          setStations(data)
+          console.log('📦 Stations loaded from cache')
+          return
+        }
+      }
+    } catch (err) {
+      console.error('Error reading stations cache:', err)
+    }
+
+    // Fetch from API if no valid cache
     try {
       const response = await fetch(`${API_URL}/stations`)
       const data = await response.json()
       if (data.success) {
         setStations(data.data)
+        // Cache the stations
+        localStorage.setItem(STATIONS_CACHE_KEY, JSON.stringify({
+          data: data.data,
+          timestamp: Date.now()
+        }))
+        console.log('🌐 Stations fetched from API and cached')
       }
     } catch (err) {
       console.error('Error fetching stations:', err)
