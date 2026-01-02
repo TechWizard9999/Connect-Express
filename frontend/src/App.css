@@ -407,9 +407,48 @@ body {
     margin: 0 0.5rem;
 }
 
+.results-controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
 .results-summary {
     display: flex;
     gap: 1rem;
+}
+
+.sort-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-dropdown label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.sort-dropdown select {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.sort-dropdown select:hover {
+    border-color: var(--border-hover);
+}
+
+.sort-dropdown select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
 }
 
 .summary-badge {

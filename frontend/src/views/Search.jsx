@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import SearchForm from '../components/SearchForm'
 import ResultCard from '../components/ResultCard'
 
@@ -10,6 +10,7 @@ function Search() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchParams, setSearchParams] = useState({ from: '', to: '' })
+  const [sortBy, setSortBy] = useState('duration')
 
   useEffect(() => {
     fetchStations()
@@ -55,6 +56,39 @@ function Search() {
     return station ? station.name : code
   }
 
+  // Sort results based on selected option
+  const sortedResults = useMemo(() => {
+    if (!results) return null
+
+    const sortRoutes = (routes, type) => {
+      return [...routes].sort((a, b) => {
+        switch (sortBy) {
+          case 'duration':
+            return (type === 'direct' ? a.duration : a.totalDuration) - 
+                   (type === 'direct' ? b.duration : b.totalDuration)
+          case 'departure':
+            const depA = type === 'direct' ? a.from.departureTime : a.train1.from.departureTime
+            const depB = type === 'direct' ? b.from.departureTime : b.train1.from.departureTime
+            return depA.localeCompare(depB)
+          case 'arrival':
+            const arrA = type === 'direct' ? a.to.arrivalTime : a.train2.to.arrivalTime
+            const arrB = type === 'direct' ? b.to.arrivalTime : b.train2.to.arrivalTime
+            return arrA.localeCompare(arrB)
+          default:
+            return 0
+        }
+      })
+    }
+
+    return {
+      ...results,
+      results: {
+        direct: sortRoutes(results.results.direct, 'direct'),
+        connecting: sortRoutes(results.results.connecting, 'connecting')
+      }
+    }
+  }, [results, sortBy])
+
   return (
     <div className="app">
       <section className="search-section">
@@ -75,23 +109,37 @@ function Search() {
         </div>
       )}
 
-      {results && !loading && (
+      {sortedResults && !loading && (
         <section className="results-section">
           <div className="results-header">
             <h2 className="results-title">
               {getStationName(searchParams.from)} <span className="arrow">→</span> {getStationName(searchParams.to)}
             </h2>
-            <div className="results-summary">
-              <span className="summary-badge direct">
-                {results.directCount} Direct
-              </span>
-              <span className="summary-badge connecting">
-                {results.connectingCount} Connecting
-              </span>
+            <div className="results-controls">
+              <div className="results-summary">
+                <span className="summary-badge direct">
+                  {sortedResults.directCount} Direct
+                </span>
+                <span className="summary-badge connecting">
+                  {sortedResults.connectingCount} Connecting
+                </span>
+              </div>
+              <div className="sort-dropdown">
+                <label htmlFor="sort">Sort by:</label>
+                <select 
+                  id="sort" 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="duration">⏱️ Duration</option>
+                  <option value="departure">🚀 Departure Time</option>
+                  <option value="arrival">📍 Arrival Time</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {results.directCount === 0 && results.connectingCount === 0 ? (
+          {sortedResults.directCount === 0 && sortedResults.connectingCount === 0 ? (
             <div className="no-results">
               <div className="no-results-icon">🔍</div>
               <h3>No routes found</h3>
@@ -99,7 +147,7 @@ function Search() {
             </div>
           ) : (
             <div className="result-cards">
-              {results.results.direct.map((route, index) => (
+              {sortedResults.results.direct.map((route, index) => (
                 <ResultCard 
                   key={`direct-${index}`} 
                   route={route}
@@ -107,13 +155,13 @@ function Search() {
                 />
               ))}
 
-              {results.results.direct.length > 0 && results.results.connecting.length > 0 && (
+              {sortedResults.results.direct.length > 0 && sortedResults.results.connecting.length > 0 && (
                 <div className="section-divider">
                   <span>Connecting Routes</span>
                 </div>
               )}
 
-              {results.results.connecting.map((route, index) => (
+              {sortedResults.results.connecting.map((route, index) => (
                 <ResultCard 
                   key={`connecting-${index}`} 
                   route={route}
