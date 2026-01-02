@@ -3,13 +3,25 @@ import { useState } from 'react'
 function SearchForm({ stations, onSearch, loading }) {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (from && to && from !== to) {
-      onSearch(from, to)
+      onSearch(from, to, date)
     }
   }
+
+  const handleSwap = () => {
+    const temp = from
+    setFrom(to)
+    setTo(temp)
+  }
+
+  // Get today's date for min date
+  const today = new Date().toISOString().split('T')[0]
+  // Get max date (30 days from now)
+  const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
   return (
     <form className="search-form" onSubmit={handleSubmit}>
@@ -34,6 +46,17 @@ function SearchForm({ stations, onSearch, loading }) {
           </div>
         </div>
 
+        {/* Swap Button */}
+        <button 
+          type="button" 
+          className="swap-btn" 
+          onClick={handleSwap}
+          title="Swap stations"
+          disabled={!from && !to}
+        >
+          ⇄
+        </button>
+
         <div className="form-group">
           <label htmlFor="to">Destination Station</label>
           <div className="input-wrapper">
@@ -51,6 +74,23 @@ function SearchForm({ stations, onSearch, loading }) {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        {/* Date Picker */}
+        <div className="form-group">
+          <label htmlFor="date">Travel Date</label>
+          <div className="input-wrapper">
+            <span className="input-icon">📅</span>
+            <input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              min={today}
+              max={maxDate}
+              required
+            />
           </div>
         </div>
       </div>
