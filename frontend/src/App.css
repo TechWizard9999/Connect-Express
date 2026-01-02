@@ -622,6 +622,40 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.copy-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
+.copy-btn.copied {
+    background: var(--accent-success);
+    color: white;
+    border-color: var(--accent-success);
+}
+
 /* JOURNEY VISUALIZATION - Vertical Timeline */
 .journey-preview {
     display: flex;

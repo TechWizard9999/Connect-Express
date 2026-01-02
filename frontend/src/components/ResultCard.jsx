@@ -1,10 +1,68 @@
+import { useState } from 'react'
+
 function ResultCard({ route, getStationName }) {
+  const [copied, setCopied] = useState(false)
+
+  const copyRouteDetails = () => {
+    let text = ''
+    
+    if (route.type === 'direct') {
+      text = `🚂 Direct Train
+━━━━━━━━━━━━━━━━━━━━
+📍 ${getStationName(route.from.stationCode)} (${route.from.stationCode})
+   Departure: ${route.from.departureTime}
+
+🚆 Train: ${route.trainNumber} - ${route.trainName}
+⏱️ Duration: ${route.durationFormatted}
+
+📍 ${getStationName(route.to.stationCode)} (${route.to.stationCode})
+   Arrival: ${route.to.arrivalTime}
+━━━━━━━━━━━━━━━━━━━━
+via Connect Express 🚄`
+    } else {
+      text = `🚂 Connecting Route
+━━━━━━━━━━━━━━━━━━━━
+📍 ${getStationName(route.train1.from.stationCode)} (${route.train1.from.stationCode})
+   Departure: ${route.train1.from.departureTime}
+
+🚆 Train 1: ${route.train1.trainNumber} - ${route.train1.trainName}
+⏱️ Duration: ${route.train1.durationFormatted}
+
+🔄 Change at ${getStationName(route.connectionStation)}
+   Layover: ${route.layoverFormatted}
+
+🚆 Train 2: ${route.train2.trainNumber} - ${route.train2.trainName}
+⏱️ Duration: ${route.train2.durationFormatted}
+
+📍 ${getStationName(route.train2.to.stationCode)} (${route.train2.to.stationCode})
+   Arrival: ${route.train2.to.arrivalTime}
+
+⏱️ Total Duration: ${route.totalDurationFormatted}
+━━━━━━━━━━━━━━━━━━━━
+via Connect Express 🚄`
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   if (route.type === 'direct') {
     return (
       <div className="result-card">
         <div className="card-header">
           <span className="train-badge direct">✓ Direct</span>
-          <span className="duration-badge">{route.durationFormatted}</span>
+          <div className="card-actions">
+            <span className="duration-badge">{route.durationFormatted}</span>
+            <button 
+              className={`copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyRouteDetails}
+              title="Copy route details"
+            >
+              {copied ? '✓' : '📋'}
+            </button>
+          </div>
         </div>
 
         <div className="journey-preview">
@@ -47,7 +105,16 @@ function ResultCard({ route, getStationName }) {
     <div className="result-card">
       <div className="card-header">
         <span className="train-badge connecting">↔ Connecting via {route.connectionStation}</span>
-        <span className="duration-badge">{route.totalDurationFormatted}</span>
+        <div className="card-actions">
+          <span className="duration-badge">{route.totalDurationFormatted}</span>
+          <button 
+            className={`copy-btn ${copied ? 'copied' : ''}`}
+            onClick={copyRouteDetails}
+            title="Copy route details"
+          >
+            {copied ? '✓' : '📋'}
+          </button>
+        </div>
       </div>
 
       <div className="journey-preview">
