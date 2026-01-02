@@ -1,5 +1,7 @@
 node_modules/
 .DS_Store
-backend/.env
+.env
+.env.*
+dist/
 build/
 MISTAKES_LOG.md

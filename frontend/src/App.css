@@ -1,34 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
 :root {
     /* Premium Railway Theme - Deep Night & High-Speed Accents */
     --bg-primary: #020617;
-    /* Slate 950 */
     --bg-secondary: #0f172a;
-    /* Slate 900 */
     --bg-card: rgba(15, 23, 42, 0.6);
     --bg-glass: rgba(255, 255, 255, 0.03);
     --bg-glass-strong: rgba(255, 255, 255, 0.07);
 
     /* Accents */
     --accent-primary: #f97316;
-    /* Orange 500 */
     --accent-primary-glow: rgba(249, 115, 22, 0.4);
     --accent-secondary: #38bdf8;
-    /* Sky 400 */
     --accent-secondary-glow: rgba(56, 189, 248, 0.4);
     --accent-success: #10b981;
-    /* Emerald 500 */
     --accent-warning: #fbbf24;
-    /* Amber 400 */
     --accent-danger: #ef4444;
-    /* Red 500 */
 
     /* Text */
     --text-primary: #f8fafc;
-    /* Slate 50 */
     --text-secondary: #94a3b8;
-    /* Slate 400 */
     --text-muted: #64748b;
-    /* Slate 500 */
 
     /* Borders & Interaction */
     --border-color: rgba(255, 255, 255, 0.08);
@@ -48,8 +40,6 @@
     --radius-xl: 24px;
     --radius-full: 9999px;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 * {
     margin: 0;
