@@ -80,8 +80,7 @@ function SearchForm({ stations, onSearch, loading }) {
         {/* Date Picker */}
         <div className="form-group">
           <label htmlFor="date">Travel Date</label>
-          <div className="input-wrapper">
-            <span className="input-icon">📅</span>
+          <div className="input-wrapper date-wrapper">
             <input
               type="date"
               id="date"

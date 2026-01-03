@@ -3,10 +3,13 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
 import Home from './views/Home'
 import Search from './views/Search'
+import Login from './views/Login'
+import Signup from './views/Signup'
 
 function App() {
   const location = useLocation()
   const isHomePage = location.pathname === '/'
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   
   // Theme state - check localStorage for saved preference, default to dark
   const [theme, setTheme] = useState(() => {
@@ -53,7 +56,7 @@ function App() {
       )}
 
       <div className={isHomePage ? "" : "app"}>
-        {!isHomePage && (
+        {!isHomePage && !isAuthPage && (
           <header className="header">
             <Link to="/" className="logo-link">
               <div className="logo small">
@@ -67,6 +70,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signin" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/register" element={<Signup />} />
         </Routes>
       </div>
       

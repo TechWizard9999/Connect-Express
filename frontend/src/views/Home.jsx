@@ -1,8 +1,24 @@
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import './Home.css'
 
 function Home() {
   const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // Check if user is logged in
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      setUser(JSON.parse(savedUser))
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+  }
 
   return (
     <div className="home-container">
@@ -18,6 +34,24 @@ function Home() {
         <source src="https://player.vimeo.com/external/370331493.sd.mp4?s=7b9015c9ac0207fa6c048bce9302c019744c8034&profile_id=164&oauth2_token_id=57447761" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+
+      {/* Auth Header */}
+      <div className="home-header">
+        <div className="home-logo">🚄 Connect Express</div>
+        <div className="auth-buttons">
+          {user ? (
+            <>
+              <span className="user-greeting">👋 Hi, {user.name}</span>
+              <button className="auth-link logout" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="auth-link">Sign In</Link>
+              <Link to="/signup" className="auth-link primary">Sign Up</Link>
+            </>
+          )}
+        </div>
+      </div>
 
       <div className="network-status-bar">
         <div className="status-item">
@@ -49,10 +83,18 @@ function Home() {
         <div className="cta-group">
           <button 
             className="cta-primary"
-            onClick={() => navigate('/search')}
+            onClick={() => user ? navigate('/search') : navigate('/login')}
           >
-            INITIALIZE RESEARCH_
+            {user ? 'INITIALIZE RESEARCH_' : 'SIGN IN TO START'}
           </button>
+          {!user && (
+            <button 
+              className="cta-secondary"
+              onClick={() => navigate('/signup')}
+            >
+              CREATE ACCOUNT
+            </button>
+          )}
           
           <div className="live-stats">
             <div className="stat-pill">
