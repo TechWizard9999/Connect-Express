@@ -43,8 +43,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Use select to include password for comparison
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -56,9 +55,9 @@ exports.login = async (req, res) => {
 
     // Create JWT Token
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id },
       JWT_SECRET,
-      { expiresIn: '24h', algorithm: 'HS256' }
+      { expiresIn: '24h' }
     );
 
     res.json({
