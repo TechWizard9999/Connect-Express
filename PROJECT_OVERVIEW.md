@@ -14,6 +14,7 @@
 - **Smart Routing**: Finds routes even if no direct train exists.
 - **Realistic Time Calculations**: Handles day changes (e.g., train departing at 11 PM and arriving at 2 AM next day).
 - **Layover Constraints**: Ensures connections are feasible (e.g., minimum 1 hour, maximum 12 hours waiting time).
+- **High Performance**: Uses a **C++ Addon** for routing calculations via **N-API**.
 
 ---
 
@@ -26,7 +27,7 @@ This is a straightforward database query.
 3. Calculate duration.
 
 ### Connecting Trains (The "Brute Force" Logic)
-This is where the heavy lifting happens. We use a **Meet-in-the-Middle** strategy with a brute-force verification step.
+This is where the heavy lifting happens. We use a **Meet-in-the-Middle** strategy with a brute-force verification step inside our **C++ Engine**.
 
 **The "Brute Force" Steps:**
 1. **Fetch Candidate Trains**: 
@@ -52,7 +53,70 @@ Because the computer checks **thousands of combinations** instantly. If there ar
 
 ---
 
-## 3. Caching Strategy (Redis)
+## 3. High-Performance C++ Integration (N-API)
+
+To achieve maximum efficiency, the complex "brute force" routing logic is implemented in **C++** and accessed from Node.js using **N-API** (Node-API).
+
+### Why N-API + Shared Library?
+We use a **shared library (.node)** architecture for the best of both worlds:
+1. **Performance**: Takes advantage of C++'s raw speed for CPU-intensive loops.
+2. **Efficiency**: Avoids the overhead of starting new processes (spawning child processes).
+3. **Integration**: Allows JavaScript to call C++ functions **synchronously** as if they were native JS functions.
+
+### Complete Data Flow: End-to-End
+
+```mermaid
+sequenceDiagram
+    participant User as Browser (React)
+    participant Node as Node.js (Backend)
+    participant DB as MongoDB
+    participant NAPI as N-API Bridge
+    participant CPP as C++ Engine
+
+    User->>Node: GET /api/search?from=MAS&to=SBC
+    Node->>DB: Fetch ALL trains
+    DB-->>Node: Return JS Array of Trains
+    
+    Note over Node, CPP: ⚡ CROSSING THE BRIDGE ⚡
+    
+    Node->>NAPI: Call findConnectingRoutes(trains)
+    NAPI->>CPP: Convert JS Array → C++ Vector
+    
+    rect rgb(20, 20, 20)
+        Note right of CPP: 🚀 C++ ALGORITHM RUNS
+        CPP->>CPP: Hash Trains by Station
+        CPP->>CPP: Find Intersections
+        CPP->>CPP: Validate Layovers
+        CPP->>CPP: Sort by Duration
+    end
+    
+    CPP->>NAPI: Return std::vector<Route>
+    NAPI->>Node: Convert C++ Vector → JS Array
+    
+    Note over Node, CPP: ⚡ BACK TO JAVASCRIPT ⚡
+    
+    Node-->>User: JSON Response { routes: [...] }
+    User-->>User: Render Results UI
+```
+
+### The 3 Phases of Execution
+
+**Phase 1: Build Time (npm install)**
+- `cmake-js` compiles `router.cpp`
+- Creates a shared library binary: `build/Release/route_engine.node` (~200KB)
+
+**Phase 2: Server Start (npm start)**
+- Node.js loads the binary into memory using `require()`.
+- The C++ functions are now available to the Node.js process.
+
+**Phase 3: Runtime (User Request)**
+- **Input**: JS Array of train objects.
+- **Processing**: Data crosses the N-API bridge, gets processed at C++ speed (~0.03ms).
+- **Output**: Resulting routes are converted back to JS objects and sent to the user.
+
+---
+
+## 4. Caching Strategy (Redis)
 
 We implement a **Cache-Aside** strategy to improve performance for frequent searches.
 
@@ -68,7 +132,7 @@ We implement a **Cache-Aside** strategy to improve performance for frequent sear
 
 ---
 
-## 4. Practical Example: Multi-User Scenario
+## 5. Practical Example: Multi-User Scenario
 
 ### Scenario: 3 Users Searching Simultaneously
 **Current State**: Server running on port 5002, connected to MongoDB Atlas (212 trains).
@@ -85,8 +149,8 @@ We implement a **Cache-Aside** strategy to improve performance for frequent sear
   - Direct trains found: 9.
   - **Connecting Logic Triggered**:
     - Finds common stations: `KPD`, `SA`, `ED`.
-    - **Brute Force**: Checks connection `MAS -> KPD` (Train 1) + `KPD -> CBE` (Train 2).
-    - Checks 263 possibilities, filters for valid layovers (1-12 hrs).
+    - **Brute Force (C++)**: Checks connection `MAS -> KPD` (Train 1) + `KPD -> CBE` (Train 2).
+    - Checks 263 possibilities in milliseconds.
   - **Result**: Shows 20 best options sorted by total duration.
 
 #### User 3: "Explorer"
@@ -98,11 +162,11 @@ We implement a **Cache-Aside** strategy to improve performance for frequent sear
   - **Result**: Valid connection found via Guntakal with 2.5hr layover.
 
 ### System Reaction
-Since Node.js is **asynchronous**, it handles these requests **concurrently**:
-1. It accepts User 1's request -> Starts database query.
+Since Node.js is **asynchronous** and the C++ engine is **cpu-bound but fast**:
+1. Node accepts User 1's request -> Starts database query.
 2. While database looks for User 1, it accepts User 2's request.
 3. User 1's data returns -> Response sent.
-4. User 2's complex calculation runs (CPU intensive part).
-5. User 3's request enters queue.
+4. User 2's complex calculation runs in C++ (blocking the thread for only a microscopic ~0.03ms).
+5. User 3's request is handled almost instantly after.
 
-Even with the "brute force" logic, the calculation happens in milliseconds because checking logic conditions (Time A < Time B) is extremely fast for modern processors, handling thousands of checks in a fraction of a second.
+Even with the "brute force" logic, the calculation happens in milliseconds because compiled C++ code is highly optimized for checking logic conditions (Time A < Time B), handling thousands of checks in a fraction of a second.

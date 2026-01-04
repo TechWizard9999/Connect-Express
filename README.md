@@ -43,4 +43,28 @@ Create a `.env` file in `backend/` and `frontend/` using the `.env.example` temp
 - **Frontend**: Needs `VITE_API_URL` (points to the backend).
 
 ---
+
+## 📋 Prerequisites & Build Requirements
+
+Since this project routes via a high-performance **C++ Native Addon**, you must have C++ build tools installed to compile the backend.
+
+### 🪟 Windows
+1. Install **Visual Studio Build Tools**.
+2. Select the **"Desktop development with C++"** workload during installation.
+3. This installs the **MSVC compiler** and **Windows SDK** required by `cmake-js`.
+
+### 🍎 macOS
+```bash
+xcode-select --install
+```
+
+### 🐧 Linux (Ubuntu/Debian)
+```bash
+sudo apt-get install build-essential cmake
+```
+
+### 🐍 Python
+**Python 3.x** is required for the build scripts (node-gyp/cmake-js dependency).
+
+---
 &copy; 2026 Connect Express. Engineered for speed.
