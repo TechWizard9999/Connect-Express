@@ -1,11 +1,13 @@
 // controllers
 const { Station } = require('../models');
 const { findDirectTrains, findConnectingTrains } = require('../services/search.service');
+const db = require('../config/db');
+const memory = require('../services/memory.store');
 
 // fetch stations
 async function getStations(req, res) {
   try {
-    const stations = await Station.find().sort({ name: 1 });
+    const stations = db.useMemory ? memory.stationList : await Station.find().sort({ name: 1 });
     res.json({ success: true, count: stations.length, data: stations });
   } catch (error) {
     console.error('Error fetching stations:', error);
@@ -35,7 +37,7 @@ async function searchRoutes(req, res) {
     const cacheKey = `search:${fromCode}:${toCode}`;
     let cachedData = null;
     
-    if (redisClient.isReady) {
+    if (redisClient.isReady && !db.useMemory) {
       try {
         cachedData = await redisClient.get(cacheKey);
       } catch (err) {
@@ -61,7 +63,7 @@ async function searchRoutes(req, res) {
     };
 
     // Cache Data
-    if (redisClient.isReady) {
+    if (redisClient.isReady && !db.useMemory) {
       try {
         await redisClient.set(cacheKey, JSON.stringify(result), {
           EX: 3600

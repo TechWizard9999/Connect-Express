@@ -52,6 +52,8 @@ Since this project routes via a high-performance **C++ Native Addon**, you must 
 1. Install **Visual Studio Build Tools**.
 2. Select the **"Desktop development with C++"** workload during installation.
 3. This installs the **MSVC compiler** and **Windows SDK** required by `cmake-js`.
+4. On an **ARM64** Windows PC, also tick **"MSVC ARM64 build tools"**.
+5. Without these tools, `npm install` in `backend/` fails and the server cannot start (`Cannot find module '../build/Release/route_engine.node'`).
 
 ### 🍎 macOS
 ```bash

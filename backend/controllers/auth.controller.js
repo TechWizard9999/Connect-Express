@@ -1,19 +1,26 @@
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
+const db = require('../config/db');
+const memory = require('../services/memory.store');
 
 // Register user
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const userExists = db.useMemory ? memory.findUserByEmail(email) : await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    const user = new User({ name, email, password });
-    await user.save();
+    let user;
+    if (db.useMemory) {
+      user = await memory.createUser({ name, email, password });
+    } else {
+      user = new User({ name, email, password });
+      await user.save();
+    }
 
     // Create JWT Token
     const token = jwt.sign(
@@ -43,12 +50,12 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = db.useMemory ? memory.findUserByEmail(email) : await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = db.useMemory ? await memory.comparePassword(user, password) : await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }

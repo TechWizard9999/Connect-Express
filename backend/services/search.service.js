@@ -2,10 +2,14 @@
 const { Train } = require('../models');
 const { MIN_LAYOVER, MAX_LAYOVER } = require('../config');
 const { timeToMinutes, calculateDuration, formatDuration } = require('../utils');
+const db = require('../config/db');
+const memory = require('./memory.store');
 
 // find direct
 async function findDirectTrains(fromCode, toCode) {
-  const directTrains = await Train.find({ 'stops.stationCode': { $all: [fromCode, toCode] } });
+  const directTrains = db.useMemory
+    ? memory.trainsThrough(fromCode).filter(t => t.stops.some(s => s.stationCode === toCode))
+    : await Train.find({ 'stops.stationCode': { $all: [fromCode, toCode] } });
   const results = [];
   
   directTrains.forEach(train => {
@@ -38,8 +42,8 @@ async function findDirectTrains(fromCode, toCode) {
 const routeEngine = require('../build/Release/route_engine.node');
 
 async function findConnectingTrains(fromCode, toCode) {
-  const trainsFromA = await Train.find({ 'stops.stationCode': fromCode }).lean();
-  const trainsToB = await Train.find({ 'stops.stationCode': toCode }).lean();
+  const trainsFromA = db.useMemory ? memory.trainsThrough(fromCode) : await Train.find({ 'stops.stationCode': fromCode }).lean();
+  const trainsToB = db.useMemory ? memory.trainsThrough(toCode) : await Train.find({ 'stops.stationCode': toCode }).lean();
 
   const results = routeEngine.findConnectingRoutes(
     trainsFromA,

@@ -7,6 +7,7 @@ const cors = require('cors');
 const { PORT } = require('./config');
 const apiRoutes = require('./routes');
 const { seedDatabase } = require('./services/seeder.service');
+const db = require('./config/db');
 
 const app = express();
 
@@ -29,14 +30,28 @@ app.get('/', (req, res) => {
 async function startServer() {
   try {
     const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
-    if (!mongoUri) {
-      throw new Error('Database connection string (MONGO_URI or MONGODB_URI) not found in environment variables');
+    let stationCount, trainCount;
+
+    if (mongoUri) {
+      try {
+        await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
+        console.log('Connected to MongoDB');
+        ({ stationCount, trainCount } = await seedDatabase());
+      } catch (err) {
+        console.warn(`MongoDB not reachable (${err.message}). Falling back to in-memory data.`);
+        await mongoose.disconnect().catch(() => {});
+        db.useMemory = true;
+      }
+    } else {
+      console.warn('MONGO_URI not set. Using in-memory data (users and train times reset on every restart).');
+      db.useMemory = true;
     }
 
-    await mongoose.connect(mongoUri);
-    console.log('Connected to MongoDB Atlas');
-
-    const { stationCount, trainCount } = await seedDatabase();
+    if (db.useMemory) {
+      const memory = require('./services/memory.store');
+      stationCount = memory.stationList.length;
+      trainCount = memory.trains.length;
+    }
 
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

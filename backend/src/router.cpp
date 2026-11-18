@@ -134,8 +134,9 @@ Napi::Value FindConnectingRoutes(const Napi::CallbackInfo& info) {
                     
                     if (arrMins < 0 || depMins < 0) continue;
 
-                    int layover = depMins - arrMins;
-                    if (layover < 0) layover += 1440; 
+                    // trains run daily: compare clock times and wait for the next departure
+                    int layover = (depMins % 1440) - (arrMins % 1440);
+                    if (layover < 0) layover += 1440;
                     
                     if (layover >= minLayover && layover <= maxLayover) {
                         int leg1Start = TimeToMinutes(leg1.fromStop.departureTime, leg1.fromStop.day);

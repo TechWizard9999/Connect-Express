@@ -24,16 +24,17 @@ function generateTrains() {
         const travelMinutes = 30 + Math.floor(Math.random() * 90);
         const arrResult = addMinutes(currentTime, travelMinutes);
         const arrivalTime = arrResult.time;
-        currentDay = arrResult.day;
+        currentDay += arrResult.day - 1;
         
         if (index === route.length - 1) {
           return { stationCode, arrivalTime, departureTime: null, day: currentDay };
         }
         
         const haltMinutes = 2 + Math.floor(Math.random() * 8);
-        const depResult = addMinutes(arrivalTime, haltMinutes);
+        let depResult = addMinutes(arrivalTime, haltMinutes);
+        // a stop has only one "day" field, so a short halt must not cross midnight
+        if (depResult.day > 1) depResult = { time: '23:59', day: 1 };
         currentTime = depResult.time;
-        if (depResult.day > 1) currentDay = depResult.day;
         
         return { stationCode, arrivalTime, departureTime: currentTime, day: currentDay };
       });
@@ -69,4 +70,4 @@ async function seedDatabase() {
   return { stationCount: uniqueStations.length, trainCount: trains.length };
 }
 
-module.exports = { seedDatabase };
+module.exports = { seedDatabase, generateTrains };
