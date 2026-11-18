@@ -6,6 +6,7 @@
     "scripts": {
         "start": "node server.js",
         "dev": "node server.js",
+        "test": "node --test test/seeder.test.js test/api.memory.test.js",
         "install": "cmake-js compile",
         "rebuild": "cmake-js rebuild"
     },
